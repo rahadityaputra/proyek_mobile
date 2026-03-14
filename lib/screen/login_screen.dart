@@ -31,12 +31,18 @@ class _LoginScreenState extends State<LoginScreen> {
       (user) => user.username == username && user.password == password,
     );
 
+    final fullname = userData
+        .firstWhere(
+          (user) => user.username == username && user.password == password,
+        )
+        .fullname;
+
     if (isValid) {
       debugPrint('berhasil login');
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => DashboardScreen(username: username),
+          builder: (context) => DashboardScreen(fullname: fullname),
         ),
         (route) => false,
       );
@@ -65,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Container(
               child: Center(
                 child: Text(
-                  'Selamat Datang di Proyek Kuis',
+                  'SakuKit',
                   style: GoogleFonts.poppins(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -77,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 8),
             Center(
               child: Text(
-                'Silakan login untuk melanjutkan',
+                'Please login to continue',
                 style: GoogleFonts.poppins(
                   fontSize: 14.0,
                   color: Colors.white70,
@@ -87,7 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 32),
             Container(
               decoration: BoxDecoration(
-                // boxShadow: BoxShadow.lerpList(a, b, t)
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
@@ -128,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         label: Text('Password', style: GoogleFonts.poppins()),
                         prefixIcon: const Icon(
-                          Icons.password,
+                          Icons.lock,
                           color: Color(0xFF6C63FF),
                         ),
                         suffixIcon: IconButton(

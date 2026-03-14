@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:proyek_mobile/model/character_data.dart';
-// import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:proyek_mobile/model/character_analysis_notifier.dart';
 import 'package:proyek_mobile/widget/horizontal_histogram.dart';
 
@@ -36,7 +34,7 @@ class _CharacterAnalysisScreenState extends State<CharacterAnalysisScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Character Map')),
+      appBar: AppBar(title: const Text('Character Analysis')),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
