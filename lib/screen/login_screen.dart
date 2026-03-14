@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:proyek_mobile/data/user_data.dart';
 import 'package:proyek_mobile/screen/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,16 +24,26 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
-    if (_usernameController.text.trim() == "adit" &&
-        _passwordController.text.trim() == "095") {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    final isValid = userData.any(
+      (user) => user.username == username && user.password == password,
+    );
+
+    if (isValid) {
       debugPrint('berhasil login');
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              DashboardScreen(username: _usernameController.text.trim()),
+          builder: (context) => DashboardScreen(username: username),
         ),
         (route) => false,
+      );
+    } else {
+      debugPrint('gagal login');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username atau password salah')),
       );
     }
   }

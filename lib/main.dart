@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyek_mobile/core/app_router.dart';
 import 'package:proyek_mobile/core/app_routes.dart';
-// import 'package:proyek_mobile/screen/dashboard_screen.dart';
-// import 'package:proyek_mobile/screen/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,11 +10,10 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Proyek Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -72,10 +69,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // initialRoute: AppRoutes.login,
-      initialRoute: AppRoutes.dashboard,
+      initialRoute: AppRoutes.login,
       onGenerateRoute: (settings) => AppRouter.generateRoute(settings),
-      // home: const DashboardScreen(username: 'fdfsdfsdf'),
     );
   }
 }

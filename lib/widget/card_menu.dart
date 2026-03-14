@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:proyek_mobile/data/menu.dart';
 
 class CardMenu extends StatelessWidget {
@@ -15,12 +16,9 @@ class CardMenu extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white, 
-          borderRadius: BorderRadius.circular(20), 
-          border: Border.all(
-            color: Colors.grey.shade200, 
-            width: 1,
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF6C63FF).withOpacity(0.08),
@@ -31,20 +29,6 @@ class CardMenu extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Container(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-                child: Image.network(
-                  menu.imageUrl,
-                  width: double.infinity,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(),
@@ -52,6 +36,12 @@ class CardMenu extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  HugeIcon(
+                    icon: menu.icon,
+                    size: 40,
+                    color: const Color(0xFF6C63FF),
+                  ),
+                  // (menu.icon, size: 40, color: const Color(0xFF6C63FF)),
                   Text(
                     menu.name,
                     style: GoogleFonts.poppins(

@@ -274,6 +274,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width <= 768;
     return Scaffold(
+      appBar: AppBar(title: const Text('Calculator')),
       body: isMobile
           ? _buildMainView(context, true)
           : Row(

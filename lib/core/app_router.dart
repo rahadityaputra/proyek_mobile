@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_mobile/core/app_routes.dart';
 import 'package:proyek_mobile/screen/calculator_screen.dart';
+import 'package:proyek_mobile/screen/character_analysis_screen.dart';
 import 'package:proyek_mobile/screen/dashboard_screen.dart';
 import 'package:proyek_mobile/screen/login_screen.dart';
 import 'package:proyek_mobile/screen/number_screen.dart';
@@ -14,18 +15,18 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case AppRoutes.dashboard:
         return MaterialPageRoute(
-          builder: (_) => DashboardScreen(username: 'serferjekfje'),
+          builder: (_) => DashboardScreen(username: 'ADIT'),
         );
       case AppRoutes.bilangan:
         return MaterialPageRoute(builder: (_) => NumberScreen());
-      case AppRoutes.prisma:
+      case AppRoutes.pyramid:
         return MaterialPageRoute(builder: (_) => PiramidScreen());
       case AppRoutes.calculator:
         return MaterialPageRoute(builder: (_) => CalculatorScreen());
-      case AppRoutes.perhitungan:
-        return MaterialPageRoute(builder: (_) => NumberScreen());
       case AppRoutes.stopwatch:
         return MaterialPageRoute(builder: (_) => const StopwatchScreen());
+      case AppRoutes.characterMap:
+        return MaterialPageRoute(builder: (_) => CharacterAnalysisScreen());
       default:
         return MaterialPageRoute(builder: (_) => NumberScreen());
     }

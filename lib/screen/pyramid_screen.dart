@@ -12,6 +12,7 @@ class _PiramidScreenState extends State<PiramidScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Pyramid')),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -23,16 +24,16 @@ class _PiramidScreenState extends State<PiramidScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-              Center(
-                child: Text(
-                  'Pyramid',
-                  style: GoogleFonts.poppins(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            Center(
+              child: Text(
+                'Pyramid',
+                style: GoogleFonts.poppins(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
+            ),
             const SizedBox(height: 32),
             Container(
               decoration: BoxDecoration(

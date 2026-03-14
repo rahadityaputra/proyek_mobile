@@ -7,7 +7,8 @@ class StopwatchScreen extends StatefulWidget {
   _StopwatchScreenState createState() => _StopwatchScreenState();
 }
 
-class _StopwatchScreenState extends State<StopwatchScreen> with SingleTickerProviderStateMixin {
+class _StopwatchScreenState extends State<StopwatchScreen>
+    with SingleTickerProviderStateMixin {
   late Stopwatch _stopwatch;
   late AnimationController _penggerakLayar;
 
@@ -15,15 +16,14 @@ class _StopwatchScreenState extends State<StopwatchScreen> with SingleTickerProv
   void initState() {
     super.initState();
     _stopwatch = Stopwatch();
-    
-    _penggerakLayar = AnimationController(
-      vsync: this,
-      duration: const Duration(days: 365),
-    )..addListener(() {
-        if (_stopwatch.isRunning) {
-          setState(() {}); 
-        }
-      });
+
+    _penggerakLayar =
+        AnimationController(vsync: this, duration: const Duration(days: 365))
+          ..addListener(() {
+            if (_stopwatch.isRunning) {
+              setState(() {});
+            }
+          });
   }
 
   void _mulaiStopwatch() {
@@ -45,10 +45,13 @@ class _StopwatchScreenState extends State<StopwatchScreen> with SingleTickerProv
 
   String _formatWaktu() {
     var waktu = _stopwatch.elapsed.inMilliseconds;
-    String milidetik = (waktu % 1000).toString().padLeft(3, "0").substring(0, 2);
+    String milidetik = (waktu % 1000)
+        .toString()
+        .padLeft(3, "0")
+        .substring(0, 2);
     String detik = ((waktu ~/ 1000) % 60).toString().padLeft(2, "0");
     String menit = ((waktu ~/ 1000) ~/ 60).toString().padLeft(2, "0");
-    
+
     return "$menit:$detik:$milidetik";
   }
 
@@ -61,9 +64,7 @@ class _StopwatchScreenState extends State<StopwatchScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Menu Stopwatch'),
-      ),
+      appBar: AppBar(title: const Text('Stopwatch')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -90,20 +91,31 @@ class _StopwatchScreenState extends State<StopwatchScreen> with SingleTickerProv
               children: [
                 ElevatedButton(
                   onPressed: _stopwatch.isRunning ? null : _mulaiStopwatch,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: const Text('Start', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Text(
+                    'Start',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
                 const SizedBox(width: 15),
                 ElevatedButton(
                   onPressed: _stopwatch.isRunning ? _hentiStopwatch : null,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text('Stop', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Stop',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
                 const SizedBox(width: 15),
                 ElevatedButton(
                   onPressed: _resetStopwatch,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                  child: const Text('Reset', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Reset',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
