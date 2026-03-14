@@ -15,7 +15,7 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case AppRoutes.dashboard:
         return MaterialPageRoute(
-          builder: (_) => DashboardScreen(username: 'ADIT'),
+          builder: (_) => DashboardScreen(fullname: 'rahaditya abimanyu putra'),
         );
       case AppRoutes.bilangan:
         return MaterialPageRoute(builder: (_) => NumberScreen());

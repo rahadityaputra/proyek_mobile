@@ -4,8 +4,8 @@ import 'package:proyek_mobile/data/menu.dart';
 import 'package:proyek_mobile/widget/card_menu.dart';
 
 class DashboardScreen extends StatefulWidget {
-  final String username;
-  const DashboardScreen({super.key, required this.username});
+  final String fullname;
+  const DashboardScreen({super.key, required this.fullname});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -81,9 +81,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hi,${widget.username}',
+                          'Hi,${widget.fullname}',
                           style: GoogleFonts.poppins(
-                            fontSize: 22.0,
+                            fontSize: 15.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),

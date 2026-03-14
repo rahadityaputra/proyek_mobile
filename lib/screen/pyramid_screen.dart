@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:proyek_mobile/model/pyramid_notifier.dart';
 
 class PiramidScreen extends StatefulWidget {
   const PiramidScreen({super.key});
@@ -9,6 +10,35 @@ class PiramidScreen extends StatefulWidget {
 }
 
 class _PiramidScreenState extends State<PiramidScreen> {
+  late TextEditingController _baseController;
+  late TextEditingController _heightController;
+  final PyramidNotifier _pyramidNotifier = PyramidNotifier();
+
+  @override
+  void initState() {
+    super.initState();
+    _baseController = TextEditingController();
+    _heightController = TextEditingController();
+    _pyramidNotifier.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _baseController.dispose();
+    _heightController.dispose();
+    _pyramidNotifier.dispose();
+    super.dispose();
+  }
+
+  String _formatNumber(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,17 +54,6 @@ class _PiramidScreenState extends State<PiramidScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(
-              child: Text(
-                'Pyramid',
-                style: GoogleFonts.poppins(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -49,41 +68,117 @@ class _PiramidScreenState extends State<PiramidScreen> {
               ),
               margin: const EdgeInsets.symmetric(horizontal: 24),
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    TextFormField(
+                    DropdownButtonFormField<PyramidBaseType>(
+                      value: _pyramidNotifier.baseType,
                       decoration: InputDecoration(
-                        label: Text('Username', style: GoogleFonts.poppins()),
-                        hintText: 'example123',
-                        hintStyle: GoogleFonts.poppins(
-                          color: Colors.grey.shade400,
-                        ),
-                        border: OutlineInputBorder(
+                        label: Text('Base shape', style: GoogleFonts.poppins()),
+                        border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                         prefixIcon: const Icon(
-                          Icons.email,
+                          Icons.change_history,
                           color: Color(0xFF6C63FF),
                         ),
                       ),
-                      style: GoogleFonts.poppins(),
-                      autofocus: true,
+                      items: const [
+                        DropdownMenuItem(
+                          value: PyramidBaseType.square,
+                          child: Text('Square'),
+                        ),
+                        DropdownMenuItem(
+                          value: PyramidBaseType.circle,
+                          child: Text('Circle'),
+                        ),
+                        DropdownMenuItem(
+                          value: PyramidBaseType.equilateralTriangle,
+                          child: Text('Equilateral Triangle'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        _pyramidNotifier.updateBaseType(value);
+                      },
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
+                      controller: _baseController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: _pyramidNotifier.updateBaseValue,
                       decoration: InputDecoration(
-                        label: Text('Password', style: GoogleFonts.poppins()),
+                        label: Text(
+                          _pyramidNotifier.baseInputLabel,
+                          style: GoogleFonts.poppins(),
+                        ),
+                        hintText: '0',
+                        hintStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade400,
+                        ),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                         prefixIcon: const Icon(
-                          Icons.password,
+                          Icons.straighten,
                           color: Color(0xFF6C63FF),
                         ),
-                        border: OutlineInputBorder(
+                      ),
+                      style: GoogleFonts.poppins(),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _heightController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: _pyramidNotifier.updateHeight,
+                      decoration: InputDecoration(
+                        label: Text('Height', style: GoogleFonts.poppins()),
+                        hintText: '0',
+                        hintStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade400,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.height,
+                          color: Color(0xFF6C63FF),
+                        ),
+                        border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                       ),
                       style: GoogleFonts.poppins(),
-                      autofocus: true,
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F5FA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Volume: ${_formatNumber(_pyramidNotifier.volume)}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Surface Area: ${_formatNumber(_pyramidNotifier.surfaceArea)}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

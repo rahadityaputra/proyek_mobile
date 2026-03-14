@@ -1,15 +1,16 @@
 import 'package:proyek_mobile/model/pyramid_base.dart';
 
 class EquilateralTriangle extends PyramidBase {
+  final double side;
+
+  EquilateralTriangle({required this.side});
   @override
   double getArea() {
-    // TODO: implement getArea
-    throw UnimplementedError();
+    return (1.7320508075688772 / 4) * side * side;
   }
 
   @override
   double getApothem() {
-    // TODO: implement getApothem
-    throw UnimplementedError();
+    return side / 1.7320508075688772;
   }
 }
