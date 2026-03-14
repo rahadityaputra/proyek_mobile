@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
-  bool _isObscured = false;
+  bool _isObscured = true;
 
   @override
   void initState() {
@@ -31,13 +31,12 @@ class _LoginScreenState extends State<LoginScreen> {
       (user) => user.username == username && user.password == password,
     );
 
-    final fullname = userData
-        .firstWhere(
-          (user) => user.username == username && user.password == password,
-        )
-        .fullname;
-
     if (isValid) {
+      final fullname = userData
+          .firstWhere(
+            (user) => user.username == username && user.password == password,
+      )
+          .fullname;
       debugPrint('berhasil login');
       Navigator.pushAndRemoveUntil(
         context,

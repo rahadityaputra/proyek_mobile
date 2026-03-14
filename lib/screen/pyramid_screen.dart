@@ -44,6 +44,8 @@ class _PiramidScreenState extends State<PiramidScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Pyramid')),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -51,25 +53,25 @@ class _PiramidScreenState extends State<PiramidScreen> {
             colors: [Color(0xFF6C63FF), Color(0xFF4840BB)],
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              margin: const EdgeInsets.symmetric(horizontal: 24),
+        child: Center(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<PyramidBaseType>(
                       value: _pyramidNotifier.baseType,
@@ -188,8 +190,7 @@ class _PiramidScreenState extends State<PiramidScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 28),
-          ],
+          ),
         ),
       ),
     );

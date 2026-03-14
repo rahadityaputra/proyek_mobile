@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_mobile/core/app_routes.dart';
+import 'package:proyek_mobile/screen/about_screen.dart';
 import 'package:proyek_mobile/screen/calculator_screen.dart';
 import 'package:proyek_mobile/screen/character_analysis_screen.dart';
 import 'package:proyek_mobile/screen/dashboard_screen.dart';
@@ -7,6 +8,7 @@ import 'package:proyek_mobile/screen/login_screen.dart';
 import 'package:proyek_mobile/screen/number_screen.dart';
 import 'package:proyek_mobile/screen/pyramid_screen.dart';
 import 'package:proyek_mobile/screen/stopwatch_screen.dart';
+import 'package:proyek_mobile/screen/weton_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings routeSetting) {
@@ -27,6 +29,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const StopwatchScreen());
       case AppRoutes.characterMap:
         return MaterialPageRoute(builder: (_) => CharacterAnalysisScreen());
+      case AppRoutes.about:
+        return MaterialPageRoute(builder: (_) => AboutScreen());
+      case AppRoutes.jawa:
+        return MaterialPageRoute(builder: (_) => WetonScreen());
       default:
         return MaterialPageRoute(builder: (_) => NumberScreen());
     }

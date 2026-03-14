@@ -82,6 +82,7 @@ class _StopwatchScreenState extends State<StopwatchScreen>
                   fontSize: 60,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF6C63FF),
+                  fontFamily: "monospace"
                 ),
               ),
             ),

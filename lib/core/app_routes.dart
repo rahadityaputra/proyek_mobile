@@ -7,4 +7,6 @@ class AppRoutes {
   static const stopwatch = '/stopwatch';
   static const bilangan = '/bilangan';
   static const prisma = '/prisma';
+  static const about = '/about';
+  static const jawa = '/jawa';
 }

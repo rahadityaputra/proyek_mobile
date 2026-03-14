@@ -193,7 +193,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  bool _isPrime(int value) {
+  static bool _isPrime(int value) {
     if (value == 1) {
       return false;
     }
