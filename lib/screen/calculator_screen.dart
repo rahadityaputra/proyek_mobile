@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -8,100 +7,442 @@ class CalculatorScreen extends StatefulWidget {
   State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
+enum BinaryOperator { addition, substraction, multiplication, division }
+
+final _binaryOperatorsSymbolMap = {
+  BinaryOperator.addition: "+",
+  BinaryOperator.substraction: "-",
+  BinaryOperator.multiplication: "×",
+  BinaryOperator.division: "/",
+};
+
+class HistoryItem {
+  final String operations;
+  final double result;
+
+  HistoryItem({required this.operations, required this.result});
+}
+
 class _CalculatorScreenState extends State<CalculatorScreen> {
+  List<double> _numberStack = [];
+  BinaryOperator? _operator = null;
+  double? _operationResult = null;
+  bool _operationReversed = false;
+  String _currentNumberAbsolute = "0";
+  bool _currentNumberPositive = true;
+  List<HistoryItem> _histories = [];
+
+  String get _currentNumberText {
+    if (_operationResult != null) return _operationResult.toString();
+    return "${_currentNumberPositive ? "" : "-"}$_currentNumberAbsolute";
+  }
+
+  double get _currentNumberDouble {
+    return double.parse(_currentNumberText);
+  }
+
+  String get _stackPreview {
+    if (_numberStack.isEmpty) return "";
+
+    String result =
+        "${_numberStack.first}";
+    if (_operator != null) {
+      result += " ${_binaryOperatorsSymbolMap[_operator]}";
+    }
+    if (_numberStack.length > 1) {
+      result += " ${_numberStack[1]}";
+    }
+    if (_operationReversed) {
+      result = "-($result)";
+    }
+    if (_operationResult != null) {
+      result += " =";
+    }
+    return result;
+  }
+
+  void _resetCurrentNumber() {
+    _currentNumberAbsolute = "0";
+    _currentNumberPositive = true;
+  }
+
+  void _resetOperationResult() {
+    if (_operationResult != null) {
+      _numberStack.clear();
+      _operationResult = null;
+      _operationReversed = false;
+      _operator = null;
+      _resetCurrentNumber();
+    }
+  }
+
+  void _reset() {
+    setState(() {
+      _numberStack.clear();
+      _operationResult = null;
+      _operationReversed = false;
+      _operator = null;
+      _resetCurrentNumber();
+    });
+  }
+
+  void _addDigit(String digit) {
+    setState(() {
+      _resetOperationResult();
+      if (_currentNumberAbsolute == "0") {
+        _currentNumberAbsolute = digit;
+        return;
+      }
+      _currentNumberAbsolute += digit;
+    });
+  }
+
+  void _removeLastChar() {
+    setState(() {
+      if (_operationResult != null) {
+        final last = _operationResult!;
+        _resetOperationResult();
+        _currentNumberAbsolute = last.abs().toString();
+        _currentNumberPositive = last > 0;
+      }
+      _currentNumberAbsolute = _currentNumberAbsolute.substring(
+        0,
+        _currentNumberAbsolute.length - 1,
+      );
+      if (_currentNumberAbsolute.isEmpty) _currentNumberAbsolute = "0";
+    });
+  }
+
+  void _reverseSign() {
+    setState(() {
+      if (_operationResult != null) {
+        _operationResult = _operationResult! * -1;
+        _operationReversed = !_operationReversed;
+      } else {
+        _currentNumberPositive = !_currentNumberPositive;
+      }
+    });
+  }
+
+  void _addDecimalSeparator() {
+    setState(() {
+      if (_operationResult != null) _resetOperationResult();
+      if (_currentNumberAbsolute.contains(".")) return;
+
+      _resetOperationResult();
+      _currentNumberAbsolute += ".";
+    });
+  }
+
+  void _setOperator(BinaryOperator operator) {
+    setState(() {
+      if (_operationResult != null) {
+        _numberStack.clear();
+        _numberStack.add(_operationResult!);
+        _operationResult = null;
+        _operationReversed = false;
+        _resetCurrentNumber();
+      } else if (_operator == null) {
+        _numberStack.add(_currentNumberDouble);
+        _resetCurrentNumber();
+      }
+      _operator = operator;
+    });
+  }
+
+  void _submit() {
+    setState(() {
+      if (_numberStack.isEmpty || (_numberStack.length == 1 && _operator != null)) {
+        _numberStack.add(_currentNumberDouble);
+      } else {
+        _numberStack[0] = _currentNumberDouble;
+      }
+
+      if (_numberStack.length == 1) {
+        _operationResult = _numberStack.first;
+        _operationReversed = false;
+      } else if (_numberStack.length == 2) {
+        double c = 0;
+        final a = _numberStack[0];
+        final b = _numberStack[1];
+        switch (_operator) {
+          case null:
+            return;
+          case BinaryOperator.addition:
+            c = a + b;
+            break;
+          case BinaryOperator.substraction:
+            c = a - b;
+            break;
+          case BinaryOperator.multiplication:
+            c = a * b;
+            break;
+          case BinaryOperator.division:
+            c = a / b;
+            break;
+        }
+        _operationResult = c;
+        _operationReversed = false;
+      }
+
+      _histories.insert(
+        0,
+        HistoryItem(operations: _stackPreview, result: _currentNumberDouble),
+      );
+    });
+  }
+
+  void _showInfoDialog() {
+    final number = _currentNumberDouble;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Informasi Angka"),
+          content: Text(
+            "Angka $number adalah ${number % 2 == 0 ? "Genap" : "Ganjil"}",
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+        },
+    );
+  }
+
+  void _showHistorySheet() {
+    showModalBottomSheet(context: context, builder: (context) => _buildHistoryList(context, true));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width <= 768;
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF6C63FF), Color(0xFF4840BB)],
+      body: isMobile
+          ? _buildMainView(context, true)
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 480),
+                  child: _buildMainView(context, false),
+                ),
+                Flexible(child: _buildHistoryList(context, false)),
+              ],
+            ),
+    );
+  }
+
+  Column _buildHistoryList(BuildContext context, bool isBottomSheet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text("Riwayat", style: Theme.of(context).textTheme.titleLarge),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _histories.length,
+            itemBuilder: (context, index) {
+              final item = _histories[index];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      _reset();
+                      _currentNumberAbsolute = item.result.abs().toString();
+                      _currentNumberPositive = item.result >= 0;
+                      if (isBottomSheet) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            item.operations,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Text(
+                            item.result.toString(),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Divider(height: 0),
+                ],
+              );
+            },
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              child: Center(
-                child: Text(
-                  'Selamat Datang di Proyek Kuis',
-                  style: GoogleFonts.poppins(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+      ],
+    );
+  }
+
+  Column _buildMainView(BuildContext context, bool showHistoryButton) {
+    final secondaryColor = Theme.of(context).colorScheme.surfaceContainer;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Flexible(
+          child: Container(
+            constraints: BoxConstraints(minHeight: 160),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ...(showHistoryButton ?  [IconButton(
+                    onPressed: _showHistorySheet,
+                    icon: Icon(Icons.history),
+                  )] : []),
+                  Text(
+                    _stackPreview,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                'Silakan login untuk melanjutkan',
-                style: GoogleFonts.poppins(
-                  fontSize: 14.0,
-                  color: Colors.white70,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                  Text(
+                    _currentNumberText,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    onPressed: _showInfoDialog,
+                    icon: Icon(Icons.info),
                   ),
                 ],
               ),
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              child: Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(
-                        label: Text('Username', style: GoogleFonts.poppins()),
-                        hintText: 'example123',
-                        hintStyle: GoogleFonts.poppins(
-                          color: Colors.grey.shade400,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.email,
-                          color: Color(0xFF6C63FF),
-                        ),
-                      ),
-                      style: GoogleFonts.poppins(),
-                      autofocus: true,
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        label: Text('Password', style: GoogleFonts.poppins()),
-                        prefixIcon: const Icon(
-                          Icons.password,
-                          color: Color(0xFF6C63FF),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                      style: GoogleFonts.poppins(),
-                      autofocus: true,
-                    ),
-                  ],
-                ),
-              ),
             ),
-            const SizedBox(height: 28),
-          ],
+          ),
+        ),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 320),
+          child: Column(
+            children: [
+              _buildGridRow([
+                _buildGridButtonText(
+                  "C",
+                  onTap: _reset,
+                  flex: 2,
+                  color: secondaryColor,
+                ),
+                _buildGridButton(
+                  child: Icon(Icons.backspace),
+                  onTap: _removeLastChar,
+                  color: secondaryColor,
+                ),
+                _buildGridButtonText(
+                  "÷",
+                  onTap: () => _setOperator(BinaryOperator.division),
+                  color: secondaryColor,
+                ),
+              ]),
+              _buildGridRow([
+                _buildDigitButton("7"),
+                _buildDigitButton("8"),
+                _buildDigitButton("9"),
+                _buildGridButtonText(
+                  "×",
+                  onTap: () => _setOperator(BinaryOperator.multiplication),
+                  color: secondaryColor,
+                ),
+              ]),
+              _buildGridRow([
+                _buildDigitButton("4"),
+                _buildDigitButton("5"),
+                _buildDigitButton("6"),
+                _buildGridButtonText(
+                  "-",
+                  onTap: () => _setOperator(BinaryOperator.substraction),
+                  color: secondaryColor,
+                ),
+              ]),
+              _buildGridRow([
+                _buildDigitButton("1"),
+                _buildDigitButton("2"),
+                _buildDigitButton("3"),
+                _buildGridButtonText(
+                  "+",
+                  onTap: () => _setOperator(BinaryOperator.addition),
+                  color: secondaryColor,
+                ),
+              ]),
+              _buildGridRow([
+                _buildGridButtonText("+/-", onTap: _reverseSign),
+                _buildDigitButton("0"),
+                _buildGridButtonText(".", onTap: _addDecimalSeparator),
+                _buildGridButtonText(
+                  "=",
+                  onTap: _submit,
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                ),
+              ]),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridRow(List<Widget> children) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildDigitButton(String digit) {
+    return _buildGridButtonText(
+      digit,
+      onTap: () {
+        _addDigit(digit);
+      },
+    );
+  }
+
+  Widget _buildGridButtonText(
+    String text, {
+    void Function()? onTap,
+    int flex = 1,
+    Color? color,
+  }) {
+    return _buildGridButton(
+      onTap: onTap,
+      flex: flex,
+      color: color,
+      child: Text(text, style: Theme.of(context).textTheme.titleMedium),
+    );
+  }
+
+  Widget _buildGridButton({
+    required Widget child,
+    void Function()? onTap,
+    int flex = 1,
+    Color? color,
+  }) {
+    return Expanded(
+      flex: flex,
+      child: Card.outlined(
+        color: color ?? Theme.of(context).cardTheme.color,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: InkWell(
+          onTap: onTap,
+          child: Center(child: child),
         ),
       ),
     );

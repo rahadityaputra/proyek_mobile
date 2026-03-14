@@ -6,4 +6,5 @@ class AppRoutes {
   static const pyramid = '/pyramid';
   static const stopwatch = '/stopwatch';
   static const bilangan = '/bilangan';
+  static const prisma = '/prisma';
 }
