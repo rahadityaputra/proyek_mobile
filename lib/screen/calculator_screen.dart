@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class CalculatorScreen extends StatefulWidget {
@@ -44,8 +45,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String get _stackPreview {
     if (_numberStack.isEmpty) return "";
 
-    String result =
-        "${_numberStack.first}";
+    String result = "${_numberStack.first}";
     if (_operator != null) {
       result += " ${_binaryOperatorsSymbolMap[_operator]}";
     }
@@ -152,7 +152,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _submit() {
     setState(() {
-      if (_numberStack.isEmpty || (_numberStack.length == 1 && _operator != null)) {
+      if (_numberStack.isEmpty ||
+          (_numberStack.length == 1 && _operator != null)) {
         _numberStack.add(_currentNumberDouble);
       } else {
         _numberStack[0] = _currentNumberDouble;
@@ -192,15 +193,59 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
+  bool _isPrime(int value) {
+    if (value == 1) {
+      return false;
+    }
+    for (int i = 2; i < value; ++i) {
+      if (value % i == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   void _showInfoDialog() {
     final number = _currentNumberDouble;
+    final jenis = number % 1 != 0
+        ? "Desimal"
+        : number % 2 == 0
+        ? "Genap"
+        : "Ganjil";
+    final prima = number % 1 != 0
+        ? Future.value(false)
+        : compute(_isPrime, number.toInt());
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text("Informasi Angka"),
-          content: Text(
-            "Angka $number adalah ${number % 2 == 0 ? "Genap" : "Ganjil"}",
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Angka $number adalah $jenis"),
+              FutureBuilder(
+                future: prima,
+                builder: (context, future) {
+                  if (!future.hasData) {
+                    return Column(
+                      children: [
+                        Text("Menguji apakah bilangan prima atau bukan"),
+                        LinearProgressIndicator(),
+                      ],
+                    );
+                  }
+                  return Text(
+                    number % 1 != 0
+                        ? "Bilangan desimal jelas bukan prima"
+                        : future.data!
+                        ? "Ini bilangan prima"
+                        : "Ini bukan bilangan prima",
+                  );
+                },
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -214,12 +259,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ],
         );
-        },
+      },
     );
   }
 
   void _showHistorySheet() {
-    showModalBottomSheet(context: context, builder: (context) => _buildHistoryList(context, true));
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _buildHistoryList(context, true),
+    );
   }
 
   @override
@@ -307,10 +355,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  ...(showHistoryButton ?  [IconButton(
-                    onPressed: _showHistorySheet,
-                    icon: Icon(Icons.history),
-                  )] : []),
+                  ...(showHistoryButton
+                      ? [
+                          IconButton(
+                            onPressed: _showHistorySheet,
+                            icon: Icon(Icons.history),
+                          ),
+                        ]
+                      : []),
                   Text(
                     _stackPreview,
                     style: Theme.of(context).textTheme.bodyLarge,
