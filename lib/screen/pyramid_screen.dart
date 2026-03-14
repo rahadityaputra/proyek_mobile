@@ -109,6 +109,8 @@ class _PiramidScreenState extends State<PiramidScreen> {
                         decimal: true,
                       ),
                       onChanged: _pyramidNotifier.updateBaseValue,
+                      validator: validateDouble,
+                      autovalidateMode: AutovalidateMode.always,
                       decoration: InputDecoration(
                         label: Text(
                           _pyramidNotifier.baseInputLabel,
@@ -135,6 +137,8 @@ class _PiramidScreenState extends State<PiramidScreen> {
                         decimal: true,
                       ),
                       onChanged: _pyramidNotifier.updateHeight,
+                      validator: validateDouble,
+                      autovalidateMode: AutovalidateMode.always,
                       decoration: InputDecoration(
                         label: Text('Height', style: GoogleFonts.poppins()),
                         hintText: '0',
@@ -189,5 +193,15 @@ class _PiramidScreenState extends State<PiramidScreen> {
         ),
       ),
     );
+  }
+
+  String? validateDouble(text) {
+    if (text == null || text.isEmpty) {
+      return 'Cannot be empty';
+    }
+    if (double.tryParse(text) == null) {
+      return 'Must be a number';
+    }
+    return null;
   }
 }
