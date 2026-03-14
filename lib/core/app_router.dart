@@ -5,6 +5,7 @@ import 'package:proyek_mobile/screen/dashboard_screen.dart';
 import 'package:proyek_mobile/screen/login_screen.dart';
 import 'package:proyek_mobile/screen/number_screen.dart';
 import 'package:proyek_mobile/screen/pyramid_screen.dart';
+import 'package:proyek_mobile/screen/stopwatch_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings routeSetting) {
@@ -23,6 +24,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => CalculatorScreen());
       case AppRoutes.perhitungan:
         return MaterialPageRoute(builder: (_) => NumberScreen());
+      case AppRoutes.stopwatch:
+        return MaterialPageRoute(builder: (_) => const StopwatchScreen());
       default:
         return MaterialPageRoute(builder: (_) => NumberScreen());
     }
