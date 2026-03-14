@@ -5,6 +5,7 @@ const List<User> userData = [
   User(username: 'rahadi', password: '12345', fullname: 'Rahadi Putra'),
   User(username: 'putra', password: 'qwerty', fullname: 'Putra Aditya'),
   User(username: 'guest', password: 'guest', fullname: 'Guest User'),
+  User(username: 'levi', password: '127', fullname: 'Levi Rizki Saputra')
 ];
 
 

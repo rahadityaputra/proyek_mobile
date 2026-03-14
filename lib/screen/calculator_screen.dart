@@ -212,7 +212,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         : number % 2 == 0
         ? "Genap"
         : "Ganjil";
-    final prima = number % 1 != 0
+    final prima = number % 1 != 0 || number < 1
         ? Future.value(false)
         : compute(_isPrime, number.toInt());
     showDialog(
@@ -274,133 +274,155 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width <= 768;
     return Scaffold(
-      appBar: AppBar(title: const Text('Calculator')),
-      body: isMobile
-          ? _buildMainView(context, true)
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 480),
-                  child: _buildMainView(context, false),
+      appBar: AppBar(
+        title: const Text('Calculator'),
+        actions: isMobile
+            ? [
+                IconButton(
+                  onPressed: _showHistorySheet,
+                  icon: Icon(Icons.history),
                 ),
-                Flexible(child: _buildHistoryList(context, false)),
-              ],
-            ),
+              ]
+            : [],
+      ),
+      body: SafeArea(
+        child: isMobile
+            ? _buildMainView(context)
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 480),
+                    child: _buildMainView(context),
+                  ),
+                  Flexible(child: _buildHistoryList(context, false)),
+                ],
+              ),
+      ),
     );
   }
 
   Column _buildHistoryList(BuildContext context, bool isBottomSheet) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text("Riwayat", style: Theme.of(context).textTheme.titleLarge),
+          child: Text("History", style: Theme.of(context).textTheme.titleLarge),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: _histories.length,
-            itemBuilder: (context, index) {
-              final item = _histories[index];
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      _reset();
-                      _currentNumberAbsolute = item.result.abs().toString();
-                      _currentNumberPositive = item.result >= 0;
-                      if (isBottomSheet) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            item.operations,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          Text(
-                            item.result.toString(),
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ],
-                      ),
-                    ),
+          child: _histories.length == 0
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    "Empty",
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  Divider(height: 0),
-                ],
-              );
-            },
-          ),
+                )
+              : ListView.builder(
+                  itemCount: _histories.length,
+                  itemBuilder: (context, index) {
+                    final item = _histories[index];
+                    return _buildHistoryItem(item, isBottomSheet, context);
+                  },
+                ),
         ),
       ],
     );
   }
 
-  Column _buildMainView(BuildContext context, bool showHistoryButton) {
-    final secondaryColor = Theme.of(context).colorScheme.surfaceContainer;
+  Column _buildHistoryItem(
+    HistoryItem item,
+    bool isBottomSheet,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Flexible(
-          child: Container(
-            constraints: BoxConstraints(minHeight: 160),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ...(showHistoryButton
-                      ? [
-                          IconButton(
-                            onPressed: _showHistorySheet,
-                            icon: Icon(Icons.history),
-                          ),
-                        ]
-                      : []),
-                  Text(
-                    _stackPreview,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    _currentNumberText,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    onPressed: _showInfoDialog,
-                    icon: Icon(Icons.info),
-                  ),
-                ],
-              ),
+        InkWell(
+          onTap: () {
+            _reset();
+            _currentNumberAbsolute = item.result.abs().toString();
+            _currentNumberPositive = item.result >= 0;
+            if (isBottomSheet) {
+              Navigator.pop(context);
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  item.operations,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  item.result.toString(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
             ),
           ),
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 320),
+        Divider(height: 0),
+      ],
+    );
+  }
+
+  Column _buildMainView(BuildContext context) {
+    final secondaryColor = Colors.grey[700];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SingleChildScrollView(
+                child: Text(
+                  _stackPreview,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  _currentNumberText,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              IconButton(
+                onPressed: _showInfoDialog,
+                icon: Icon(Icons.info),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 10,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               _buildGridRow([
                 _buildGridButtonText(
                   "C",
                   onTap: _reset,
                   flex: 2,
-                  color: secondaryColor,
+                  color: Colors.grey[300]
                 ),
                 _buildGridButton(
-                  child: Icon(Icons.backspace),
+                  child: Icon(Icons.backspace, color: Colors.white),
                   onTap: _removeLastChar,
-                  color: secondaryColor,
+                  color: Colors.red,
                 ),
                 _buildGridButtonText(
                   "÷",
                   onTap: () => _setOperator(BinaryOperator.division),
                   color: secondaryColor,
+                  foreground: Colors.white,
                 ),
               ]),
               _buildGridRow([
@@ -411,6 +433,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   "×",
                   onTap: () => _setOperator(BinaryOperator.multiplication),
                   color: secondaryColor,
+                  foreground: Colors.white,
                 ),
               ]),
               _buildGridRow([
@@ -421,6 +444,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   "-",
                   onTap: () => _setOperator(BinaryOperator.substraction),
                   color: secondaryColor,
+                  foreground: Colors.white,
                 ),
               ]),
               _buildGridRow([
@@ -431,6 +455,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   "+",
                   onTap: () => _setOperator(BinaryOperator.addition),
                   color: secondaryColor,
+                  foreground: Colors.white,
                 ),
               ]),
               _buildGridRow([
@@ -440,7 +465,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 _buildGridButtonText(
                   "=",
                   onTap: _submit,
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: Colors.green,
+                  foreground: Colors.white,
                 ),
               ]),
             ],
@@ -451,10 +477,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildGridRow(List<Widget> children) {
-    return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+    return Flexible(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: 80),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
       ),
     );
   }
@@ -473,12 +502,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     void Function()? onTap,
     int flex = 1,
     Color? color,
+    Color? foreground,
   }) {
     return _buildGridButton(
       onTap: onTap,
       flex: flex,
       color: color,
-      child: Text(text, style: Theme.of(context).textTheme.titleMedium),
+      child: Text(
+        text,
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(color: foreground),
+      ),
     );
   }
 
@@ -491,7 +526,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Expanded(
       flex: flex,
       child: Card.outlined(
-        color: color ?? Theme.of(context).cardTheme.color,
+        color: color ?? null,
         clipBehavior: Clip.antiAliasWithSaveLayer,
         child: InkWell(
           onTap: onTap,
