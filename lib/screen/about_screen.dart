@@ -8,7 +8,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pyramid')),
+      appBar: AppBar(title: const Text('About')),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -57,7 +57,7 @@ class AboutScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          "123230128. Muhammad Faiz Al-Ghifari",
+                          "123230128. Faiz Muhammad Al-Ghifari",
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(

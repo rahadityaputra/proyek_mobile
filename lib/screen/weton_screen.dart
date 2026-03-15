@@ -45,7 +45,7 @@ class _WetonScreenState extends State<WetonScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pyramid')),
+      appBar: AppBar(title: const Text('Weton')),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
