@@ -1,5 +1,7 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rational/rational.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -19,38 +21,39 @@ final _binaryOperatorsSymbolMap = {
 
 class HistoryItem {
   final String operations;
-  final double result;
+  final Rational result;
 
   HistoryItem({required this.operations, required this.result});
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  List<double> _numberStack = [];
+  List<Rational> _numberStack = [];
   BinaryOperator? _operator = null;
-  double? _operationResult = null;
+  Rational? _operationResult = null;
   bool _operationReversed = false;
   String _currentNumberAbsolute = "0";
   bool _currentNumberPositive = true;
   List<HistoryItem> _histories = [];
 
   String get _currentNumberText {
-    if (_operationResult != null) return _operationResult.toString();
-    return "${_currentNumberPositive ? "" : "-"}$_currentNumberAbsolute";
+    return _currentNumberRational.toDecimal().toString();
   }
 
-  double get _currentNumberDouble {
-    return double.parse(_currentNumberText);
+  Rational get _currentNumberRational {
+    if (_operationResult != null) return _operationResult!;
+    return Rational.parse(_currentNumberAbsolute) *
+        Rational.fromInt(_currentNumberPositive ? 1 : -1);
   }
 
   String get _stackPreview {
     if (_numberStack.isEmpty) return "";
 
-    String result = "${_numberStack.first}";
+    String result = "${_numberStack.first.toDecimal()}";
     if (_operator != null) {
       result += " ${_binaryOperatorsSymbolMap[_operator]}";
     }
     if (_numberStack.length > 1) {
-      result += " ${_numberStack[1]}";
+      result += " ${_numberStack[1].toDecimal()}";
     }
     if (_operationReversed) {
       result = "-($result)";
@@ -103,7 +106,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         final last = _operationResult!;
         _resetOperationResult();
         _currentNumberAbsolute = last.abs().toString();
-        _currentNumberPositive = last > 0;
+        _currentNumberPositive = last.signum > 0;
       }
       _currentNumberAbsolute = _currentNumberAbsolute.substring(
         0,
@@ -116,7 +119,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _reverseSign() {
     setState(() {
       if (_operationResult != null) {
-        _operationResult = _operationResult! * -1;
+        _operationResult = _operationResult! * Rational.parse("-1");
         _operationReversed = !_operationReversed;
       } else {
         _currentNumberPositive = !_currentNumberPositive;
@@ -143,7 +146,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _operationReversed = false;
         _resetCurrentNumber();
       } else if (_operator == null) {
-        _numberStack.add(_currentNumberDouble);
+        _numberStack.add(_currentNumberRational);
         _resetCurrentNumber();
       }
       _operator = operator;
@@ -152,18 +155,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _submit() {
     setState(() {
+      if (_numberStack.length == 1 &&
+          _operator == BinaryOperator.division &&
+          _currentNumberRational == Rational.parse("0")) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text("Division by zero"),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+        return;
+      }
       if (_numberStack.isEmpty ||
           (_numberStack.length == 1 && _operator != null)) {
-        _numberStack.add(_currentNumberDouble);
+        _numberStack.add(_currentNumberRational);
       } else {
-        _numberStack[0] = _currentNumberDouble;
+        _numberStack[0] = _currentNumberRational;
       }
 
       if (_numberStack.length == 1) {
         _operationResult = _numberStack.first;
         _operationReversed = false;
       } else if (_numberStack.length == 2) {
-        double c = 0;
+        Rational c = Rational.parse("0");
         final a = _numberStack[0];
         final b = _numberStack[1];
         switch (_operator) {
@@ -188,17 +214,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       _histories.insert(
         0,
-        HistoryItem(operations: _stackPreview, result: _currentNumberDouble),
+        HistoryItem(operations: _stackPreview, result: _currentNumberRational),
       );
     });
   }
 
-  static bool _isPrime(int value) {
-    if (value == 1) {
+  static bool _isPrime(BigInt value) {
+    if (value == BigInt.from(1)) {
       return false;
     }
-    for (int i = 2; i < value; ++i) {
-      if (value % i == 0) {
+    for (BigInt i = BigInt.from(2); i < value; i += BigInt.from(1)) {
+      if (value % i == BigInt.from(0)) {
         return false;
       }
     }
@@ -206,15 +232,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _showInfoDialog() {
-    final number = _currentNumberDouble;
-    final jenis = number % 1 != 0
+    final number = _currentNumberRational;
+    final jenis = !number.isInteger
         ? "Desimal"
-        : number % 2 == 0
+        : number.toBigInt() % BigInt.from(2) == BigInt.from(0)
         ? "Genap"
         : "Ganjil";
-    final prima = number % 1 != 0 || number < 1
+    final prima = !number.isInteger || number < Rational.parse("1")
         ? Future.value(false)
-        : compute(_isPrime, number.toInt());
+        : compute(_isPrime, number.toBigInt());
     showDialog(
       context: context,
       builder: (context) {
@@ -237,7 +263,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     );
                   }
                   return Text(
-                    number % 1 != 0
+                    !number.isInteger
                         ? "Bilangan desimal jelas bukan prima"
                         : future.data!
                         ? "Ini bilangan prima"
@@ -311,7 +337,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           child: Text("History", style: Theme.of(context).textTheme.titleLarge),
         ),
         Expanded(
-          child: _histories.length == 0
+          child: _histories.isEmpty
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
@@ -343,7 +369,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           onTap: () {
             _reset();
             _currentNumberAbsolute = item.result.abs().toString();
-            _currentNumberPositive = item.result >= 0;
+            _currentNumberPositive = item.result.signum >= 0;
             if (isBottomSheet) {
               Navigator.pop(context);
             }
@@ -393,10 +419,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              IconButton(
-                onPressed: _showInfoDialog,
-                icon: Icon(Icons.info),
-              ),
+              IconButton(onPressed: _showInfoDialog, icon: Icon(Icons.info)),
             ],
           ),
         ),
@@ -411,7 +434,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   "C",
                   onTap: _reset,
                   flex: 2,
-                  color: Colors.grey[300]
+                  color: Colors.grey[300],
                 ),
                 _buildGridButton(
                   child: Icon(Icons.backspace, color: Colors.white),
