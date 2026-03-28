@@ -31,16 +31,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   BinaryOperator? _operator = null;
   Rational? _operationResult = null;
   bool _operationReversed = false;
+  Rational? _currentNumberOverride = null;
   String _currentNumberAbsolute = "0";
   bool _currentNumberPositive = true;
   List<HistoryItem> _histories = [];
 
   String get _currentNumberText {
-    return _currentNumberRational.toDecimal().toString();
+    // return _currentNumberRational.toDecimal(scaleOnInfinitePrecision: 9).toString();
+    // this will make zero after decimal gone
+    if (_operationResult != null) return _operationResult!.toDecimal(scaleOnInfinitePrecision: 9).toString();
+    if (_currentNumberOverride != null) return _currentNumberOverride!.toDecimal(scaleOnInfinitePrecision: 9).toString();
+    return (_currentNumberPositive ? "" : "-") + _currentNumberAbsolute;
   }
 
   Rational get _currentNumberRational {
     if (_operationResult != null) return _operationResult!;
+    if (_currentNumberOverride != null) return _currentNumberOverride!;
     return Rational.parse(_currentNumberAbsolute) *
         Rational.fromInt(_currentNumberPositive ? 1 : -1);
   }
@@ -48,12 +54,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String get _stackPreview {
     if (_numberStack.isEmpty) return "";
 
-    String result = "${_numberStack.first.toDecimal()}";
+    String result = "${_numberStack.first.toDecimal(scaleOnInfinitePrecision: 9)}";
     if (_operator != null) {
       result += " ${_binaryOperatorsSymbolMap[_operator]}";
     }
     if (_numberStack.length > 1) {
-      result += " ${_numberStack[1].toDecimal()}";
+      result += " ${_numberStack[1].toDecimal(scaleOnInfinitePrecision: 9)}";
     }
     if (_operationReversed) {
       result = "-($result)";
@@ -65,6 +71,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _resetCurrentNumber() {
+    _currentNumberOverride = null;
     _currentNumberAbsolute = "0";
     _currentNumberPositive = true;
   }
@@ -92,6 +99,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _addDigit(String digit) {
     setState(() {
       _resetOperationResult();
+      _currentNumberOverride = null;
       if (_currentNumberAbsolute == "0") {
         _currentNumberAbsolute = digit;
         return;
@@ -102,10 +110,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _removeLastChar() {
     setState(() {
+      _currentNumberOverride = null;
       if (_operationResult != null) {
         final last = _operationResult!;
         _resetOperationResult();
-        _currentNumberAbsolute = last.abs().toString();
+        _currentNumberAbsolute = last.abs().toDecimal(scaleOnInfinitePrecision: 9).toString();
         _currentNumberPositive = last.signum > 0;
       }
       _currentNumberAbsolute = _currentNumberAbsolute.substring(
@@ -123,6 +132,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _operationReversed = !_operationReversed;
       } else {
         _currentNumberPositive = !_currentNumberPositive;
+        if (_currentNumberOverride != null) {
+          _currentNumberOverride = _currentNumberOverride! * Rational.parse("-1");
+        }
       }
     });
   }
@@ -133,6 +145,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       if (_currentNumberAbsolute.contains(".")) return;
 
       _resetOperationResult();
+      _currentNumberOverride = null;
       _currentNumberAbsolute += ".";
     });
   }
@@ -368,7 +381,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         InkWell(
           onTap: () {
             _reset();
-            _currentNumberAbsolute = item.result.abs().toString();
+            if (!item.result.hasFinitePrecision) {
+              _currentNumberOverride = item.result;
+            } else {
+              _currentNumberOverride = null;
+            }
+            _currentNumberAbsolute = item.result.toDecimal(scaleOnInfinitePrecision: 9).abs().toString();
             _currentNumberPositive = item.result.signum >= 0;
             if (isBottomSheet) {
               Navigator.pop(context);
@@ -384,7 +402,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Text(
-                  item.result.toString(),
+                  item.result.toDecimal(scaleOnInfinitePrecision: 9).toString(),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
